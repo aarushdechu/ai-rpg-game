@@ -42,8 +42,8 @@ def generate_story(player_input, game_state):
         player_input=player_input,
         current_location=game_state["current_location"],
         inventory=game_state["inventory"],
-        game_history=game_state["game_history"]
-        npc_status=game_state["npc_unlocked"]
+        game_history=game_state["game_history"],
+        npc_status=game_state["npc_unlocked"],
         current_goal=game_state["current_goal"]
     )
 
