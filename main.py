@@ -16,15 +16,12 @@ SHOP_ITEMS = {
 
 def load_or_start_game():
     """Load game progress if available, otherwise start a new game."""
-    if os.path.exists("data/game_state.json"):
+    save_path = "game_state.json"
+    
+    if os.path.exists(save_path):
         choice = input("Would you like to continue your previous adventure? (yes/no): ").strip().lower()
         if choice == "yes":
             game_state = load_progress()
-            print("\n📜 Welcome back to your adventure!\n")
-            print("\n📍 Location:", game_state["current_location"])
-            print("🎒 Inventory:", ", ".join(game_state["inventory"]))
-            print("❤️ Health:", game_state["health"])
-            print("💰 Gold:", game_state["gold"])
         else:
             reset_memory()
             game_state = start_new_game()
@@ -114,7 +111,6 @@ def game_loop(game_state):
 
         # Allow quitting the game
         if player_input in ["quit", "exit"]:
-            print("\n💾 Saving progress and exiting...")
             save_progress(game_state)
             break
 

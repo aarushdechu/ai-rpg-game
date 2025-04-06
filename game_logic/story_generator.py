@@ -45,7 +45,7 @@ def generate_story(player_input, game_state):
             {"role": "system", "content": "You are a Dungeon Master for a text-based RPG game."},
             {"role": "user", "content": formatted_prompt}
         ],
-        max_tokens=250
+        max_tokens=521
     )
 
     ai_response = response.choices[0].message.content
