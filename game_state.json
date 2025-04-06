@@ -1,0 +1,12 @@
+{
+    "player_name": "Aaruh",
+    "current_location": "a dark cave with glowing runes",
+    "inventory": [
+        "torch",
+        "Rusty Sword"
+    ],
+    "gold": 29,
+    "game_history": "You woke up in a mysterious cave.\nstart game \u2192 As you ignite your torch, the glimmering light illuminates the cold walls of the cave around you. The jagged rocks around appear to close in as the flickering fire begins to dance off the ancient runes etched into the stone. The air is thick with dampness and a strange energy buzzes in your ears, almost like a faint whisper, resonating from these mystical glyphs. The cave, previously silent, is now filled with an unsettling drone.\n\nAs your eyes adjust, you can distinguish three different paths leading from the main chamber. The left path is narrow and winds into darkness while the right one is wide but blocked with rubble, possibly from a recent cave in. The middle path is straight and sloping downwards, tendrils of a strange mist curling up from the shadows below.\n\nThe rune-covered walls seem to pulsate with a greying light, ebbing and flowing with the rhythm of some unknown heartbeat. Their glow has grown stronger too, casting weird patterns in the darkness. Suddenly, the glowing runes flicker, then shift, change their form. This ancient magic puzzlingly responds to the flame of your torch, maybe a clue of a long-forgotten spell. \n\nContinuing your journey will require a choice\nEngaged in combat: fight",
+    "health": 96,
+    "game_over": false
+}
