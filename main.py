@@ -35,10 +35,15 @@ def start_new_game():
         "player_name": input("Enter your name, adventurer: "),
         "current_location": "a dark cave with glowing runes",
         "inventory": ["torch"],
-        "gold": 20,  # Starting gold
+        "gold": 0,
         "game_history": "You woke up in a mysterious cave.",
         "health": 100,
         "game_over": False
+        "completed_goals": [],
+        "current_goal": "Find and activate all 3 glowing runes",
+        "runes_activated": 0,
+        "npc_unlocked": False
+
     }
     
     save_progress(game_state)
@@ -152,6 +157,19 @@ def game_loop(game_state):
                 gold_found = random.randint(3, 15)
                 game_state["gold"] += gold_found
                 print(f"\n💰 While searching, you found {gold_found} gold!")
+
+        elif "touch rune" in player_input or "activate rune" in player_input:
+        game_state["runes_activated"] += 1
+        print(f"✨ You have activated {game_state['runes_activated']} of 3 runes!")
+
+        elif game_state["runes_activated"] == 3:
+            print("\n🎉 You have completed your goal! The chamber rumbles and a hidden door opens...")
+            game_state["current_goal"] = "Explore the secret chamber beyond the runes"
+
+        elif len(game_state["completed_goals"]) >= 2 and not game_state["npc_unlocked"]:
+        game_state["npc_unlocked"] = True
+        print("\n🧙 NPCs are now available! Seek out the villagers, sages, and merchants for help.")
+
 
         else:
             # Generate AI-driven story progression
