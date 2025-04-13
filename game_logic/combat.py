@@ -27,7 +27,7 @@ def handle_combat(game_state):
             print(f"\n🎲 You roll a {player_attack} to attack!")
 
             if player_attack >= enemy["defense"]:
-                damage = roll_dice(8)  # Random damage between 1-8
+                damage = 2  # default damage unless you get different weapons (add later)
                 enemy_hp -= damage
                 print(f"⚔️ You strike {enemy['name']} for {damage} damage!")
             else:
@@ -39,7 +39,7 @@ def handle_combat(game_state):
             enemy_attack = roll_dice(20)
             
             if enemy_attack >= 12:  # Example: Player has defense 12
-                damage = roll_dice(6)  # Enemy does 1-6 damage
+                damage = enemy["damage"]
                 game_state["health"] -= damage
                 print(f"🔥 {enemy['name']} attacks you for {damage} damage!")
             else:
@@ -47,7 +47,7 @@ def handle_combat(game_state):
 
         # 🎯 Check for Victory or Defeat
         if enemy_hp <= 0:
-            gold_earned = random.randint(5, 20)  # Earn 5-20 gold
+            gold_earned = enemy["gold"]
             game_state["gold"] += gold_earned
             print(f"\n🎉 You have defeated {enemy['name']} and earned {gold_earned} gold! 🎉")
 
@@ -69,10 +69,10 @@ def handle_combat(game_state):
 def generate_enemy():
     """Generates a random enemy with stats."""
     enemies = [
-        {"name": "Goblin", "hp": 10, "defense": 10, "loot": "Goblin Dagger"},
-        {"name": "Orc", "hp": 15, "defense": 12, "loot": "Orc War Axe"},
-        {"name": "Dark Wizard", "hp": 12, "defense": 14, "loot": "Magic Scroll"},
-        {"name": "Skeleton Warrior", "hp": 8, "defense": 11, "loot": "Rusty Sword"},
+        {"name": "Goblin", "hp": 10, "defense": 10, "loot": "Goblin Dagger", "damage": 7, "gold": 15},
+        {"name": "Orc", "hp": 15, "defense": 12, "loot": "Orc War Axe", "damage": 3, "gold": 15},
+        {"name": "Dark Wizard", "hp": 12, "defense": 14, "loot": "Magic Scroll", "damage": 5, "gold": 15},
+        {"name": "Skeleton Warrior", "hp": 8, "defense": 11, "loot": "Rusty Sword", "damage": 10, "gold": 15},
     ]
     return random.choice(enemies)
 

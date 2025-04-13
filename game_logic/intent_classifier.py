@@ -55,6 +55,7 @@ def infer_goal_action(player_input, current_goal):
                 "You are a game logic engine for a text-based RPG.\n"
                 "Given a player input and the current goal, your job is to decide whether this input helps progress that goal.\n"
                 "Respond only with 'yes' or 'no'."
+                "Be generous — if the player is attempting or clearly describing a step related to the goal, say 'yes'."
             ),
         },
         {

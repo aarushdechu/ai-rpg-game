@@ -10,7 +10,6 @@ from game_logic.game_loader import load_or_start_game
 from game_logic.intent_classifier import infer_intent, infer_goal_action
 import warnings
 
-warnings.filterwarnings("ignore")
 
 def display_intro():
     print("\n🗺️ Welcome to AI Dungeon Master RPG!")
@@ -26,7 +25,6 @@ def game_loop(game_state):
 
         raw_input = input("\nWhat do you do? ").strip()
         intent = infer_intent(raw_input)
-        print(f"🧠 Inferred intent: {intent}")
 
         if intent in ["quit", "exit"]:
             save_progress(game_state)

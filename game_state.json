@@ -1,15 +1,18 @@
 {
-    "player_name": "clear",
+    "player_name": "meow",
     "current_location": "a dark cave with glowing runes",
     "inventory": [
-        "torch"
+        "torch",
+        "Magic Scroll"
     ],
-    "gold": 0,
-    "game_history": "You woke up in a mysterious cave.\nstart game \u2192 The game begins and your eyes adjust to the dim light of the cave. Illuminated by your sputtering torch, the dark stone walls weep with condensation. A cold, damp draft brushes against your skin. As you step forward, your boots crunch against the gravel. The echo of your footfalls bounce off the jagged edges, the sound of loneliness ringing in your ears. A faint blue light paints an otherworldly hue on the cave's interior; the source, a set of 3 glowing runes carved into the stone, partially obscured by shadow. Each unique, intricate design emits a soft pulsating radiance that lures you towards it.\n\nFor your objective to activate all three runes, you have to figure out a way to approach each rune individually. A small, seemingly disorganized pile of stones sits ominously at the foot of the first rune. The second lies across the yawning chasm, just out of reach. And the third, so high up on the cavern wall that even squinting, you can barely make out its details.\n\nAs you go toward to examine the first rune, you notice a sudden movement out of the corner of your eye; something scuttles into the darkness. You follow the sound, trying to make sense of it. All seems quiet, until you feel a rumbling beneath your feet, as if the cave itself is alive... could this be the cave's guardian that the local folklore speaks of?\nUsed rune",
-    "health": 100,
+    "gold": 15,
+    "game_history": "You woke up in a mysterious cave.\nstart game \u2192 As you awaken, your eyes struggle to adjust to the dimly lit surroundings. The echo of dissipating water droplets falling from stalactites is all you hear, a somber melody in this unknown place. You fumble through your satchel for something to shed light on your surroundings. You find a single torch, a beacon of hope in the encompassing darkness.\n\nAfter igniting the torch, the walls of the cave flicker with warm, dancing shadows. You can feel the cool, damp air against your skin and the rough stone under your feet.\n\nMovement in the torchlight reveals strange etchings on the surrounding walls. The inscriptions look almost ancient, delicate in detail yet imposing with some arcane purpose. It doesn't take long before you realize these are the glowing runes you seek to activate.\n\nAs you reach out and touch one of the runes, it glows bright blue for a moment then returns to a faint glow. A low rumble echoes around the cave, no doubt from something being activated deep within. You surmise that there are still two more runes needing activation.\n\nSuddenly, a chilling wind sweeps through the cavern, extinguishing your torch and leaving you in pitch-black darkness. From somewhere deeper in the shadows, you hear a guttural growl. Something knows you're here... Something isn't happy about it. Your adventure has just begun. It's time to find the other runes... and whatever was growling in the dark.\nEngaged in combat: fight something",
+    "health": 80,
     "game_over": false,
-    "completed_goals": [],
-    "current_goal": "Find and activate all 3 glowing runes",
-    "runes_activated": 0,
+    "completed_goals": [
+        "rune_quest"
+    ],
+    "current_goal": "Recover the Crystal Sword from the Goblin King",
+    "runes_activated": 3,
     "npc_unlocked": false
 }
