@@ -8,8 +8,53 @@ from game_logic.shop import visit_shop
 from game_logic.explore import explore
 from game_logic.game_loader import load_or_start_game
 from game_logic.intent_classifier import infer_intent, infer_goal_action
-import warnings
+from game_logic.items import use_item_effect
 
+def pickup_item(game_state, raw_input):
+    item = raw_input.split(" ", 1)[-1].strip().title()
+    add_item(game_state, item)
+    print(f"🎒 Picked up {item}")
+    update_memory(game_state, f"Picked up {item}")
+
+def use_inventory_item(game_state, raw_input):
+    item = raw_input.split(" ", 1)[-1].strip().title()
+    if item in game_state["inventory"]:
+        use_item_effect(game_state, item)
+        update_memory(game_state, f"Used {item}")
+    else:
+        print("❌ You don't have that item.")
+
+def drop_inventory_item(game_state, raw_input):
+    item = raw_input.split(" ", 1)[-1].strip().title()
+    drop_item(game_state, item)
+    print(f"🗑️ Dropped {item}")
+    update_memory(game_state, f"Dropped {item}")
+
+def display_player_info(game_state):
+    print("\n📍 Location:", game_state.get("current_location", "Unknown"))
+    print("🎒 Inventory:", ", ".join(game_state.get("inventory", [])))
+    print("❤️ Health:", game_state.get("health", 0))
+    print("💰 Gold:", game_state.get("gold", 0))
+    print("🎯 Goal:", game_state.get("current_goal", "None"))
+
+# --- Action Map ---
+
+ACTION_MAP = {
+    "attack": lambda game_state, raw_input: handle_combat(game_state),
+    "talk": lambda game_state, raw_input: interact_with_npc(game_state),
+    "inventory": lambda game_state, raw_input: get_inventory(game_state),
+    "explore": lambda game_state, raw_input: explore(game_state),
+    "search": lambda game_state, raw_input: explore(game_state),
+    "shop": lambda game_state, raw_input: visit_shop(game_state),
+    "buy": lambda game_state, raw_input: visit_shop(game_state),
+    "sell": lambda game_state, raw_input: visit_shop(game_state),
+    "pickup": lambda game_state, raw_input: pickup_item(game_state, raw_input),
+    "take": lambda game_state, raw_input: pickup_item(game_state, raw_input),
+    "use": lambda game_state, raw_input: use_inventory_item(game_state, raw_input),
+    "drop": lambda game_state, raw_input: drop_inventory_item(game_state, raw_input), 
+    "info": lambda game_state, raw_input: display_player_info(game_state)
+
+}
 
 def display_intro():
     print("\n🗺️ Welcome to AI Dungeon Master RPG!")
@@ -17,12 +62,8 @@ def display_intro():
 
 def game_loop(game_state):
     while not game_state["game_over"]:
-        print("\n📍 Location:", game_state["current_location"])
-        print("🎒 Inventory:", ", ".join(game_state["inventory"]))
-        print("❤️ Health:", game_state["health"])
-        print("💰 Gold:", game_state["gold"])
-        print("🎯 Goal:", game_state.get("current_goal") or "Wander freely")
-
+        calculate_stats_from_inventory(game_state)
+        
         raw_input = input("\nWhat do you do? ").strip()
         intent = infer_intent(raw_input)
 

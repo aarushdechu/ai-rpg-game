@@ -14,8 +14,8 @@ def start_new_game():
         "completed_goals": [],
         "current_goal": "Find and activate all 3 glowing runes",
         "runes_activated": 0,
-        "npc_unlocked": False
-        "damage": 2
+        "npc_unlocked": False,
+        "damage": 2,
         "defence": 10
     }
 

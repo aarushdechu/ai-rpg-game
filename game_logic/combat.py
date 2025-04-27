@@ -1,81 +1,127 @@
 import random
-import time
+from langchain.prompts import PromptTemplate
+from langchain_openai import ChatOpenAI
+from game_logic.inventory import add_item
 from game_logic.memory import save_progress
 
+# Initialize LLM
+llm = ChatOpenAI(temperature=0.7, model="gpt-3.5-turbo")
+
+monster_prompt = PromptTemplate(
+    input_variables=[],
+    template="""
+Generate a fantasy monster for a text-based RPG game.
+
+Rules:
+- HP between 10 and 30
+- Defense between 8 and 18 (higher defense = harder to hit)
+- Damage inversely related to HP
+- Loot: 1-2 items (gold, weapons, potions)
+- Gold between 5 and 25
+
+Respond ONLY with valid JSON:
+{
+  "name": "MonsterName",
+  "hp": number,
+  "defense": number,
+  "damage": number,
+  "loot": ["item1", "item2"],
+  "gold": number
+}
+"""
+)
+
+# ✅ New Chain: prompt | llm
+monster_chain = monster_prompt | llm
+
+def generate_monster():
+    response = monster_chain.invoke({})
+    try:
+        monster = eval(response.content)
+        return monster
+    except Exception as e:
+        print("⚠️ Monster generation failed. Using fallback.")
+        return {
+            "name": "Fallback Goblin",
+            "hp": 20,
+            "defense": 10,
+            "damage": 5,
+            "loot": ["Rusty Sword"],
+            "gold": 10
+        }
+
+def player_attack_monster(monster):
+    dice_roll = random.randint(1, 20)
+    print(f"🎲 You rolled {dice_roll} vs monster defense {monster['defense']}")
+    return dice_roll >= monster["defense"]
+
+def monster_attack_player(game_state, monster):
+    dice_roll = random.randint(1, 20)
+    print(f"🎲 {monster['name']} rolled {dice_roll} vs your defense {game_state.get('defense_bonus', 10)}")
+    return dice_roll >= game_state.get("defense_bonus", 10)
+
+def distribute_loot(game_state, monster):
+    print("\n🎁 Loot Collected:")
+    for item in monster["loot"]:
+        if "gold" in item.lower():
+            try:
+                amount = int(item.split(" ")[0])
+                game_state["gold"] += amount
+                print(f"💰 Found {amount} gold!")
+            except:
+                print(f"⚠️ Could not process loot item: {item}")
+        else:
+            add_item(game_state, item)
+            print(f"🛡️ Found {item}")
+
+    game_state["gold"] += monster.get("gold", 0)
+    print(f"🪙 Earned {monster.get('gold', 0)} extra gold!")
+
 def handle_combat(game_state):
-    """Handles a combat encounter between the player and an enemy."""
-    
-    print("\n⚔️ A battle begins! ⚔️\n")
-    
-    # 🎲 Generate a random enemy
-    enemy = generate_enemy()
-    enemy_hp = enemy["hp"]
-    
-    print(f"🧌 {enemy['name']} appears! ({enemy_hp} HP)\n")
-    
-    while enemy_hp > 0 and game_state["health"] > 0:
-        # 🎯 Player's Turn
-        print("\n💥 Your Turn!")
-        action = input("Do you want to [attack] or [run]? ").strip().lower()
+    monster = generate_monster()
 
-        if action == "run":
-            print("\n🏃 You flee from the battle!")
-            return game_state  # Escape battle without damage
-        
-        elif action == "attack":
-            player_attack = roll_dice(20) + 2  # Simulating an attack roll
-            print(f"\n🎲 You roll a {player_attack} to attack!")
+    print(f"\n⚔️ A wild {monster['name']} appears!")
+    print(f"🧟 Stats → HP: {monster['hp']} | Defense: {monster['defense']} | Damage: {monster['damage']}")
 
-            if player_attack >= enemy["defense"]:
-                damage = 2  # default damage unless you get different weapons (add later)
-                enemy_hp -= damage
-                print(f"⚔️ You strike {enemy['name']} for {damage} damage!")
+    while monster["hp"] > 0 and game_state["health"] > 0:
+        action = input("\nDo you [attack], [run], or [use item]? ").strip().lower()
+
+        if action == "attack":
+            if player_attack_monster(monster):
+                player_attack = 10 + game_state.get("attack_bonus", 0)
+                monster["hp"] -= player_attack
+                print(f"🗡️ You hit {monster['name']} for {player_attack} damage! (HP left: {max(monster['hp'], 0)})")
             else:
-                print(f"❌ You miss! {enemy['name']} dodges your attack.")
+                print(f"🛡️ You missed!")
 
-        # 🎯 Enemy's Turn
-        if enemy_hp > 0:
-            print(f"\n🧌 {enemy['name']}'s turn!")
-            enemy_attack = roll_dice(20)
-            
-            if enemy_attack >= 12:  # Example: Player has defense 12
-                damage = enemy["damage"]
-                game_state["health"] -= damage
-                print(f"🔥 {enemy['name']} attacks you for {damage} damage!")
-            else:
-                print(f"💨 {enemy['name']} swings wildly but misses!")
+        elif action == "use item":
+            print("🔮 Using items during battle coming soon!")
 
-        # 🎯 Check for Victory or Defeat
-        if enemy_hp <= 0:
-            gold_earned = enemy["gold"]
-            game_state["gold"] += gold_earned
-            print(f"\n🎉 You have defeated {enemy['name']} and earned {gold_earned} gold! 🎉")
-
-            loot = enemy.get("loot")
-            if loot:
-                print(f"🎁 You found {loot}!")
-                game_state["inventory"].append(loot)  # Add loot to inventory
-
-        elif game_state["health"] <= 0:
-            print("\n💀 You have been defeated... Game Over.")
-            game_state["game_over"] = True
+        elif action == "run":
+            print("🏃 You escaped!")
+            save_progress(game_state)
             return game_state
-        
-        # Save game state after every round
-        save_progress(game_state)
 
-    return game_state  # Return updated game state
+        else:
+            print("❓ Invalid action. Try again.")
+            continue
 
-def generate_enemy():
-    """Generates a random enemy with stats."""
-    enemies = [
-        {"name": "Goblin", "hp": 10, "defense": 10, "loot": "Goblin Dagger", "damage": 7, "gold": 15},
-        {"name": "Orc", "hp": 15, "defense": 12, "loot": "Orc War Axe", "damage": 3, "gold": 15},
-        {"name": "Dark Wizard", "hp": 12, "defense": 14, "loot": "Magic Scroll", "damage": 5, "gold": 15},
-        {"name": "Skeleton Warrior", "hp": 8, "defense": 11, "loot": "Rusty Sword", "damage": 10, "gold": 15},
-    ]
-    return random.choice(enemies)
+        # Monster attacks back
+        if monster["hp"] > 0:
+            if monster_attack_player(game_state, monster):
+                damage_taken = monster["damage"]
+                game_state["health"] -= damage_taken
+                print(f"💥 {monster['name']} hits you for {damage_taken} damage! (Your HP: {max(game_state['health'], 0)})")
+            else:
+                print(f"🛡️ You dodged {monster['name']}'s attack!")
 
-def roll_dice(sides):
-    """Rolls a dice with the given number of sides."""
-    return random.randint(1, sides)
+    # Battle end
+    if game_state["health"] <= 0:
+        print("\n💀 You have been defeated...")
+        game_state["game_over"] = True
+    else:
+        print(f"\n🏆 You defeated {monster['name']}!")
+        distribute_loot(game_state, monster)
+
+    save_progress(game_state)
+    return game_state

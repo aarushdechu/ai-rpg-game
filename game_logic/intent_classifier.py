@@ -1,6 +1,5 @@
-from langchain.chat_models import ChatOpenAI
-from langchain.prompts import PromptTemplate
-from langchain.chains import LLMChain
+from langchain_openai import ChatOpenAI
+from langchain.prompts import PromptTemplate, ChatPromptTemplate, HumanMessagePromptTemplate, SystemMessagePromptTemplate
 from langchain.output_parsers import StructuredOutputParser, ResponseSchema
 
 # --- Intent Classifier Setup ---
@@ -30,37 +29,38 @@ Valid commands are:
 
 Use 'goal_action' if the action is not a generic command, but clearly helps the player progress toward their current goal (e.g., touching a rune when the goal is to activate runes).
 
-Player input: {player_input}
-
 {format_instructions}
+
+Player input: {player_input}
 """,
     input_variables=["player_input"],
     partial_variables={"format_instructions": intent_parser.get_format_instructions()}
 )
 
 llm = ChatOpenAI(temperature=0, model="gpt-3.5-turbo")
-intent_chain = LLMChain(llm=llm, prompt=intent_prompt)
+
+# --- NEW Chain (prompt | llm) ---
+intent_chain = intent_prompt | llm
 
 def infer_intent(player_input):
-    response = intent_chain.run(player_input=player_input)
-    parsed = intent_parser.parse(response)
+    response = intent_chain.invoke({"player_input": player_input})
+    parsed = intent_parser.parse(response.content)  # .content instead of ["text"]
     return parsed["intent"]
 
-# --- Goal Progress Helper ---
+# --- Goal Progress Helper (NEW, correct style) ---
+goal_prompt = ChatPromptTemplate.from_messages([
+    SystemMessagePromptTemplate.from_template(
+        "You are a game logic engine for a text-based RPG.\n"
+        "Given a player input and the current goal, your job is to decide whether this input helps progress that goal.\n"
+        "Respond only with 'yes' or 'no'. Be generous — if the player is attempting or clearly describing a step related to the goal, say 'yes'."
+    ),
+    HumanMessagePromptTemplate.from_template(
+        "Current goal: {current_goal}\nPlayer input: {player_input}\nDoes this progress the goal?"
+    )
+])
+
+goal_chain = goal_prompt | llm
+
 def infer_goal_action(player_input, current_goal):
-    response = llm.invoke([
-        {
-            "role": "system",
-            "content": (
-                "You are a game logic engine for a text-based RPG.\n"
-                "Given a player input and the current goal, your job is to decide whether this input helps progress that goal.\n"
-                "Respond only with 'yes' or 'no'."
-                "Be generous — if the player is attempting or clearly describing a step related to the goal, say 'yes'."
-            ),
-        },
-        {
-            "role": "user",
-            "content": f"Current goal: {current_goal}\nPlayer input: {player_input}\nDoes this progress the goal?"
-        },
-    ])
+    response = goal_chain.invoke({"player_input": player_input, "current_goal": current_goal})
     return response.content.strip().lower() == "yes"
