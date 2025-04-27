@@ -1,63 +1,32 @@
-import openai
-import os
+from langchain_openai import ChatOpenAI
 from langchain.prompts import PromptTemplate
-from game_logic.memory import update_memory
 
-client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+llm = ChatOpenAI(temperature=0.7, model="gpt-3.5-turbo")
 
-
-
-# Define Dungeon Master AI Prompt
-dm_prompt = PromptTemplate(
-    input_variables=["current_location", "inventory", "game_history", "player_input", "current_goal", "npc_status"],
+story_prompt = PromptTemplate(
+    input_variables=["player_input", "current_location", "inventory", "game_history", "npc_status"],
     template="""
-    You are a Dungeon Master for a text-based RPG game. 
-    Your job is to narrate the adventure, describe surroundings, and react dynamically to the player's actions.
+You are the narrator of a fantasy RPG. Given the player's input, describe what happens next.
 
-    The player is currently in:
-    {current_location}
+Player Input: {player_input}
+Current Location: {current_location}
+Inventory: {inventory}
+Game History: {game_history}
+NPCs Unlocked: {npc_status}
 
-    The player’s current goal is:
-    {current_goal}
-
-
-    They have:
-    {inventory}
-
-    Previous events:
-    {game_history}
-
-    Player action: {player_input}
-
-    NPCs are currently {npc_status}.
-
-
-    What happens next? Respond with a vivid description, a possible challenge, or an unexpected twist.
-    """
+Describe next event vividly but short (max 5 lines).
+"""
 )
 
+story_chain = story_prompt | llm
+
 def generate_story(player_input, game_state):
-    npc_status = {'unlocked' if game_state['npc_unlocked'] else 'locked'}
-    formatted_prompt = dm_prompt.format(
-        player_input=player_input,
-        current_location=game_state["current_location"],
-        inventory=game_state["inventory"],
-        game_history=game_state["game_history"],
-        npc_status=game_state["npc_unlocked"],
-        current_goal=game_state["current_goal"]
-    )
-
-    # 🆕 NEW OpenAI SDK usage
-    response = client.chat.completions.create(
-        model="gpt-4",
-        messages=[
-            {"role": "system", "content": "You are a Dungeon Master for a text-based RPG game."},
-            {"role": "user", "content": formatted_prompt}
-        ],
-        max_tokens=521
-    )
-
-    ai_response = response.choices[0].message.content
-    update_memory(game_state, f"{player_input} → {ai_response}")
-    return ai_response
-
+    npc_status = game_state["npc_unlocked"]
+    response = story_chain.invoke({
+        "player_input": player_input,
+        "current_location": game_state["current_location"],
+        "inventory": ", ".join(game_state["inventory"]),
+        "game_history": game_state["game_history"],
+        "npc_status": npc_status
+    })
+    return response.content
